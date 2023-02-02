@@ -51,13 +51,16 @@ class AnnotationProcessor : AbstractProcessor() {
                         .printMessage(Diagnostic.Kind.ERROR, "Only classes can be annotated")
                     return true
                 }
-                processAnnotation(it)
+                processAnnotation(it, annotationParam)
             }
 
         return false
     }
 
-    private fun processAnnotation(element: Element) {
+    private fun processAnnotation(
+        element: Element,
+        specialParam: String
+    ) {
         val className = element.simpleName.toString()
         val packageName = processingEnv.elementUtils.getPackageOf(element).toString()
 
@@ -114,10 +117,10 @@ class AnnotationProcessor : AbstractProcessor() {
             .returns(ClassName(packageName, className))
             .addCode(CodeBlock.builder().addStatement(
                 """
-                    println("hello world")
+                    println("${specialParam}")
                 """
                 .trimIndent()).build())
-            .addStatement("return $className(0, \"hello world\")")
+            .addStatement("return $className(0, \"${specialParam}\")")
 
         val file = fileBuilder
             .addType(classBuilder.build())

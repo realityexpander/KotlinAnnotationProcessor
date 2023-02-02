@@ -3,8 +3,6 @@ package com.realityexpander.annotationprocessor
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 
-//import android.support.v7.app.AppCompatActivity
-
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,5 +11,15 @@ class MainActivity : AppCompatActivity() {
 
         val eModel = EncapsulatedModel()
         println("eModel = ${eModel.toString()}")
+
+//        val dateString = DateString("2019-12-31")
+//        println("dateString = ${"2019-12-31".toValidatedDateString()}")
+//
+//        try {
+//            val validatedDateString = ValidatedDateString("2019-12-31")
+//            println("dateStringValidated = ${validatedDateString}")
+//        } catch (e: Exception) {
+//            println("dateStringValidated = ${e.message}")
+//        }
     }
 }

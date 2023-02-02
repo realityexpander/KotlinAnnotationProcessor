@@ -6,7 +6,7 @@ apply plugin: 'kotlin-kapt'
 android {
     compileSdkVersion 33
     defaultConfig {
-        applicationId "com.tompee.annotationprocessor"
+        applicationId "com.realityexpander.annotationprocessor"
         minSdkVersion 19
         targetSdkVersion 33
         versionCode 1
@@ -31,7 +31,7 @@ android {
             }
         }
     }
-    namespace 'com.tompee.annotationprocessor'
+    namespace 'com.realityexpander.annotationprocessor'
 }
 
 dependencies {
@@ -39,10 +39,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(path: ':aprocessor')
     kapt project(':aprocessor')
-//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.6.0'
-//    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-//    implementation 'androidx.constraintlayout.widget:constraintlayout:2.1.4'
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 }
