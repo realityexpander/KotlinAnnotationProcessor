@@ -57,6 +57,7 @@ class AnnotationProcessor : AbstractProcessor() {
         return false
     }
 
+    @OptIn(DelicateKotlinPoetApi::class)
     private fun processAnnotation(
         element: Element,
         specialParam: String
@@ -79,10 +80,12 @@ class AnnotationProcessor : AbstractProcessor() {
             if (enclosed.kind == ElementKind.FIELD) {
                 classBuilder.addProperty(
                     PropertySpec
-                        .varBuilder(
+//                        .varBuilder(
+                        .builder(
                             enclosed.simpleName.toString(),
-                            enclosed.asType().asTypeName().asNullable(),
+                            enclosed.asType().asTypeName().copy(nullable = true),
                             KModifier.PRIVATE)
+                        .mutable()
                         .initializer("null")
                         .build()
                 )
@@ -90,7 +93,7 @@ class AnnotationProcessor : AbstractProcessor() {
                     FunSpec.builder("get${enclosed.simpleName}")
                         .returns(
                             enclosed
-                            .asType().asTypeName().asNullable())
+                            .asType().asTypeName().copy(nullable = true))
                         .addStatement("return ${enclosed.simpleName}")
                         .build()
                 )
@@ -99,7 +102,7 @@ class AnnotationProcessor : AbstractProcessor() {
                         .addParameter(
                             ParameterSpec.builder(
                                 "${enclosed.simpleName}",
-                                enclosed.asType().asTypeName().asNullable()
+                                enclosed.asType().asTypeName().copy(nullable = true)
                             ).build())
                         .addStatement("this.${enclosed.simpleName} = ${enclosed.simpleName}")
                         .addCode(CodeBlock.builder().addStatement(

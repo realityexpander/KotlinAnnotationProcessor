@@ -1,7 +1,10 @@
 package com.realityexpander.aprocessor
 
 import com.google.auto.service.AutoService
-import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.TypeSpec
 import java.io.File
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
@@ -45,6 +48,7 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
         return false
     }
 
+
     private fun processAnnotation(
         element: Element,
         regexParam: String,
@@ -53,9 +57,9 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
         val className = element.simpleName.toString()
         val packageName = processingEnv.elementUtils.getPackageOf(element).toString()
 
-        val fileName = "Validate${className}Ext"
+//        val fileName = "Validate${className}Ext"
         val fileName2 = "Validate${className}"
-        val fileBuilder= FileSpec.builder(packageName, fileName)
+        val fileBuilder= FileSpec.builder(packageName, fileName2)
 
         val dollarBracket = "\${"
 
@@ -97,31 +101,34 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
 //            }
 //        }
 
-        val extensionBuilder = FunSpec.builder("toValidated${className}")
-//            .receiver(ClassName(packageName, className))
-            .receiver(String::class.asTypeName())
-            .addParameter(
-                ParameterSpec.builder(
-                    "regexPattern",
-                    String::class.asTypeName()
-                ).defaultValue("\"\"\"${regexParam}\"\"\"")
-                .build())
-            .returns(ClassName(packageName, className).asNullable())
-            .addCode(CodeBlock.builder().addStatement(
-                """
-                return if (regexPattern.toRegex().matches(this))
-                       ${className}(this)
-                    else
-                       ${if (useExceptions)
-                           "throw IllegalArgumentException(\"value: \$this does not match regexPattern: \$regexPattern\")"
-                        else
-                            "null"
-                       }
-                """
-            .trimIndent()).build())
-//            .addStatement("return $className(0, \"${regexParam}\")")
+//        val extensionBuilder = FunSpec.builder("toValidated${className}")
+////            .receiver(ClassName(packageName, className))
+//            .receiver(String::class.asTypeName())
+//            .addParameter(
+//                ParameterSpec.builder(
+//                    "regexPattern",
+//                    String::class.asTypeName()
+//                ).defaultValue("\"\"\"${regexParam}\"\"\"")
+//                    .build())
+//            .returns(ClassName(packageName, className).asNullable())
+//            .addCode(CodeBlock.builder().addStatement(
+//                """
+//                return if (regexPattern.toRegex().matches(this))
+//                       ${className}(this)
+//                    else
+//                       ${if (useExceptions)
+//                    "throw IllegalArgumentException(\"value: \$this does not match regexPattern: \$regexPattern\")"
+//                else
+//                    "null"
+//                }
+//                """
+//                    .trimIndent()).build())
+////            .addStatement("return $className(0, \"${regexParam}\")")
 
-//        val inlineClass = TypeSpec.classBuilder(fileName2)
+        val inlineClass = TypeSpec.classBuilder(fileName2)
+            .addModifiers(KModifier.VALUE)
+            .addAnnotation(JvmInline::class)
+            .addProperty("value", String::class)
 //            .addModifiers(KModifier.valueOf("value"))
 //            .primaryConstructor(
 //                FunSpec.builder("constructor")
@@ -133,21 +140,32 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
 //                    ).addModifiers(KModifier.PRIVATE)
 //                    .build()
 //                )
-////            .addCode(CodeBlock.builder().addStatement(
-////                """
-////                    println("hello")
-////
-////                """.trimIndent()
-////            ))
+            .primaryConstructor(
+                FunSpec.constructorBuilder()
+                    .addParameter("value", String::class)
+                    .addModifiers(KModifier.PRIVATE)
+//                    .addStatement("this.%N = %N", "greeting", "greeting")
+                    .build()
+            )
+//            .addCode(CodeBlock.builder().addStatement(
+//                """
+//                    println("hello")
+//
+//                """.trimIndent()
+//            ))
+
+
 
 
         val file = fileBuilder
 //            .addType(classBuilder.build())
-            .addFunction(extensionBuilder.build())
-//            .addType(inlineClass.build())
+//            .addFunction(extensionBuilder.build())
+            .addType(inlineClass.build())
             .build()
 
         val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
         file.writeTo(File(kaptKotlinGeneratedDir!!))
     }
+
+
 }
