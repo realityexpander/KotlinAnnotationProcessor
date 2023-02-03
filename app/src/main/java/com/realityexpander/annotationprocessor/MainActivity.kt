@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.realityexpander.annotationprocessor.ValidatedDateString.Companion.toValidatedDateString
 
+// Notes
+// https://cafonsomota.medium.com/debug-annotation-processor-in-kotlin-6eb462e965f8
+
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

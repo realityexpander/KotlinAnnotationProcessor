@@ -9,7 +9,7 @@ data class DateString(
 
 @Validate("""\d{2}""")
 class Month(
-    val x: String
+    val x: String // note: property name does not matter.
 )
 
 // Generates:

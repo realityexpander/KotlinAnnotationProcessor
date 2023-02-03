@@ -17,7 +17,7 @@ import javax.tools.Diagnostic
 // input strings pass a preset Regex Match pattern.
 
 @AutoService(Processor::class)
-class ValidatedAnnotationProcessor : AbstractProcessor() {
+class ValidateAnnotationProcessor : AbstractProcessor() {
     companion object {
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
     }

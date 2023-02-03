@@ -36,7 +36,6 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':annotations')
     implementation project(path: ':aprocessor')
     kapt project(':aprocessor')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
