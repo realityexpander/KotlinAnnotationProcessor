@@ -18,6 +18,9 @@ class MainActivity : AppCompatActivity() {
 
         val x = "2012-09-22".toValidatedDateString()?.value
 
+        // Example: Override built-in regex
+        val y = "20".toValidatedDateString("\\d{2}")?.value
+
         try {
             val validatedDateString = ValidatedDateString("2019-12-310")
             println("dateStringValidated = $validatedDateString")

@@ -12,6 +12,10 @@ import javax.lang.model.element.ElementKind
 import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
+// Use-case: Create single-property value class that restricts instantiation to a preset regex.
+// For any Class, generates a "Validated Value" Class that only allows
+// input strings pass a preset Regex Match pattern.
+
 @AutoService(Processor::class)
 class ValidatedAnnotationProcessor : AbstractProcessor() {
     companion object {

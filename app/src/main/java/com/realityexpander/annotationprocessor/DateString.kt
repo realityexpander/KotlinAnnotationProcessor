@@ -7,6 +7,11 @@ data class DateString(
     val value: String
 )
 
+@Validate("""\d{2}""")
+class Month(
+    val x: String
+)
+
 // Generates:
 //
 //@JvmInline
