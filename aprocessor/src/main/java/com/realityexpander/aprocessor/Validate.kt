@@ -4,5 +4,4 @@ package com.realityexpander.aprocessor
 @Retention(AnnotationRetention.SOURCE)
 annotation class Validate(
     val matchRegex: String = "",
-    val throwExceptions: Boolean = false
 )

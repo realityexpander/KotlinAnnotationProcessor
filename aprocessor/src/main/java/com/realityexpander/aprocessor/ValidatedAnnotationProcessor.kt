@@ -44,7 +44,6 @@ class ValidatedAnnotationProcessor : AbstractProcessor() {
         return false
     }
 
-
     private fun processAnnotation(
         element: Element,
         regexParam: String,
