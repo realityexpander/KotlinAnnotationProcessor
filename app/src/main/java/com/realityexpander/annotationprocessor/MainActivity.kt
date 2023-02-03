@@ -16,11 +16,13 @@ class MainActivity : AppCompatActivity() {
         val dateString = DateString("2019-12-31")
         println("dateString = ${"2019-12-31".toValidatedDateString()}")
 
+        val x = "2012-09-22".toValidatedDateString()?.value
+
         try {
-            val validatedDateString = ValidatedDateString("2019-12-31")
+            val validatedDateString = ValidatedDateString("2019-12-310")
             println("dateStringValidated = $validatedDateString")
         } catch (e: Exception) {
-            println("dateStringValidated = ${e.message}")
+            println("EXCEPTION dateStringValidated = ${e.message}")
         }
     }
 }

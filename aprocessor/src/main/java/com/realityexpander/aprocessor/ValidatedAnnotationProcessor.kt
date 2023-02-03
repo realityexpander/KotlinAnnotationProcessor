@@ -75,7 +75,7 @@ class ValidatedAnnotationProcessor : AbstractProcessor() {
                         """ 
                         |   /* Returns null for failure to validate string instead of throwing exception. */
                         |   return if (
-                        |      (regexPattern ?: regexPatternForDateString).toRegex().matches(this)
+                        |      (regexPattern ?: regexPatternFor$className).toRegex().matches(this)
                         |   )
                         |      ${modifiedClassName}(this)
                         |   else
@@ -88,7 +88,7 @@ class ValidatedAnnotationProcessor : AbstractProcessor() {
             .build()
 
         val publicConstructor = FunSpec.constructorBuilder()
-            .addParameter("valueString", String::class)
+            .addParameter("input", String::class)
             .addParameter(
                 ParameterSpec.builder(
                     "regexPattern",
@@ -100,10 +100,10 @@ class ValidatedAnnotationProcessor : AbstractProcessor() {
             .callThisConstructor(
                 """
                 |
-                |/* Validates the valueString before allowing instantiation. */
-                |valueString.to$modifiedClassName(regexPattern)?._data
-                |    ?: throw IllegalArgumentException("value: ${'$'}valueString does not match " + 
-                |    "regexPattern: ${'$'}regexPattern")
+                |/* Validates the input before allowing instantiation. */
+                |input.to$modifiedClassName(regexPattern)?.value
+                |    ?: throw IllegalArgumentException("\"${'$'}input\" does not match " + 
+                |       "regexPattern: ${'$'}{regexPattern ?: regexPatternFor$className}")
                 |
                 """.trimMargin()
             )
@@ -113,31 +113,24 @@ class ValidatedAnnotationProcessor : AbstractProcessor() {
             .addAnnotation(JvmInline::class)
             .primaryConstructor(
                 FunSpec.constructorBuilder()
-                    .addParameter("_data", String::class)
+                    .addParameter("value", String::class)
                     .addModifiers(KModifier.PRIVATE)
                     .build(),
             )
             .addProperty(
-                PropertySpec.builder("_data", String::class)
-                    .initializer("_data")
-                    .addModifiers(KModifier.PRIVATE)
+                PropertySpec.builder("value", String::class)
+                    .initializer("value")
+//                    .addModifiers(KModifier.PRIVATE)
                     .build(),
             )
             .addFunction(publicConstructor)
             .addType(companionObject)
 
-
-
-
         val file = fileBuilder
-//            .addType(classBuilder.build())
-//            .addFunction(extensionBuilder.build())
             .addType(inlineValueClass.build())
             .build()
 
         val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
         file.writeTo(File(kaptKotlinGeneratedDir!!))
     }
-
-
 }
