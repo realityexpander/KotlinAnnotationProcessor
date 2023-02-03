@@ -54,10 +54,9 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
         val className = element.simpleName.toString()
         val packageName = processingEnv.elementUtils.getPackageOf(element).toString()
 
-//        val fileName = "Validate${className}Ext"
-        val fileName2 = "Validated${className}"
-        val modifiedClassName = fileName2
-        val fileBuilder= FileSpec.builder(packageName, fileName2)
+        val fileName = "Validated${className}"
+        val modifiedClassName = fileName
+        val fileBuilder= FileSpec.builder(packageName, fileName)
 
         val companion = TypeSpec.companionObjectBuilder()
             .addProperty(
@@ -75,13 +74,14 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
                         ).defaultValue("regexPatternFor$className")
                         .build())
                     .addCode(
-                        """
+                        """ 
+                        |   /* Returns null for failure to validate string instead of throwing exception. */
                         |   return if (
                         |      (regexPattern ?: regexPatternForDateString).toRegex().matches(this)
                         |   )
                         |      ${modifiedClassName}(this)
                         |   else
-                        |       null
+                        |       null   
                         """.trimMargin()
                     )
                     .returns(ClassName(packageName, modifiedClassName).copy(nullable = true))
@@ -101,6 +101,8 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
             )
             .callThisConstructor(
                 """
+                |
+                |/* Validates the valueString before allowing instantiation. */
                 |valueString.to$modifiedClassName(regexPattern)?._data
                 |    ?: throw IllegalArgumentException("value: ${'$'}valueString does not match " + 
                 |    "regexPattern: ${'$'}regexPattern")
@@ -109,7 +111,7 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
             )
             .build()
 
-        val inlineClass2 = TypeSpec.valueClassBuilder(fileName2)
+        val inlineValueClass = TypeSpec.valueClassBuilder(fileName)
             .addAnnotation(JvmInline::class)
             .primaryConstructor(
                 FunSpec.constructorBuilder()
@@ -132,7 +134,7 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
         val file = fileBuilder
 //            .addType(classBuilder.build())
 //            .addFunction(extensionBuilder.build())
-            .addType(inlineClass2.build())
+            .addType(inlineValueClass.build())
             .build()
 
         val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]
