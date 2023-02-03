@@ -53,7 +53,6 @@ class ValidatedAnnotationProcessor : AbstractProcessor() {
         val packageName = processingEnv.elementUtils.getPackageOf(element).toString()
 
         val fileName = "Validated${className}"
-        val modifiedClassName = fileName
         val fileBuilder= FileSpec.builder(packageName, fileName)
 
         val companionObject = TypeSpec.companionObjectBuilder()
@@ -77,12 +76,12 @@ class ValidatedAnnotationProcessor : AbstractProcessor() {
                         |   return if (
                         |      (regexPattern ?: regexPatternFor$className).toRegex().matches(this)
                         |   )
-                        |      ${modifiedClassName}(this)
+                        |      $fileName(this)
                         |   else
                         |       null   
                         """.trimMargin()
                     )
-                    .returns(ClassName(packageName, modifiedClassName).copy(nullable = true))
+                    .returns(ClassName(packageName, fileName).copy(nullable = true))
                     .build()
             )
             .build()
@@ -101,7 +100,7 @@ class ValidatedAnnotationProcessor : AbstractProcessor() {
                 """
                 |
                 |/* Validates the input before allowing instantiation. */
-                |input.to$modifiedClassName(regexPattern)?.value
+                |input.to$fileName(regexPattern)?.value
                 |    ?: throw IllegalArgumentException("\"${'$'}input\" does not match " + 
                 |       "regexPattern: ${'$'}{regexPattern ?: regexPatternFor$className}")
                 |

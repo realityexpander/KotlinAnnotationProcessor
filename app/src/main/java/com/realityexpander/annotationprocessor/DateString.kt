@@ -2,7 +2,7 @@ package com.realityexpander.annotationprocessor
 
 import com.realityexpander.aprocessor.Validate
 
-@Validate("""^\d{4}-\d{2}-\d{2}$""", false)
+@Validate("""^\d{4}-\d{2}-\d{2}$""")
 data class DateString(
     val value: String
 )
