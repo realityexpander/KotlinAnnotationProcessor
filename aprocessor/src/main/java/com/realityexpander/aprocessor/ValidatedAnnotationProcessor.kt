@@ -13,7 +13,7 @@ import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
 @AutoService(Processor::class)
-class ValidateAnnotationProcessor : AbstractProcessor() {
+class ValidatedAnnotationProcessor : AbstractProcessor() {
     companion object {
         const val KAPT_KOTLIN_GENERATED_OPTION_NAME = "kapt.kotlin.generated"
     }
@@ -38,8 +38,7 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
                 }
 
                 val regexParam = it.getAnnotation(Validate::class.java).matchRegex
-                val useExceptions = it.getAnnotation(Validate::class.java).throwExceptions
-                processAnnotation(it, regexParam, useExceptions)
+                processAnnotation(it, regexParam)
             }
 
         return false
@@ -49,7 +48,6 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
     private fun processAnnotation(
         element: Element,
         regexParam: String,
-        useExceptions: Boolean = false
     ) {
         val className = element.simpleName.toString()
         val packageName = processingEnv.elementUtils.getPackageOf(element).toString()
@@ -58,7 +56,7 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
         val modifiedClassName = fileName
         val fileBuilder= FileSpec.builder(packageName, fileName)
 
-        val companion = TypeSpec.companionObjectBuilder()
+        val companionObject = TypeSpec.companionObjectBuilder()
             .addProperty(
                 PropertySpec.builder("regexPatternFor$className", String::class)
                     .initializer("%S", regexParam)
@@ -126,7 +124,7 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
                     .build(),
             )
             .addFunction(publicConstructor)
-            .addType(companion)
+            .addType(companionObject)
 
 
 
