@@ -2,6 +2,7 @@ package com.realityexpander.annotationprocessor
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.realityexpander.annotationprocessor.ValidatedDateString.Companion.toValidatedDateString
 
 class MainActivity : AppCompatActivity() {
 
@@ -12,11 +13,11 @@ class MainActivity : AppCompatActivity() {
         val eModel = EncapsulatedModel()
         println("eModel = ${eModel.toString()}")
 
-//        val dateString = DateString("2019-12-31")
-//        println("dateString = ${"2019-12-31".toValidatedDateString()}")
-//
+        val dateString = DateString("2019-12-31")
+        println("dateString = ${"2019-12-31".toValidatedDateString()}")
+
 //        try {
-//            val validatedDateString = ValidatedDateString("2019-12-31")
+//            val validatedDateString = ValidateDateString("2019-12-31")
 //            println("dateStringValidated = ${validatedDateString}")
 //        } catch (e: Exception) {
 //            println("dateStringValidated = ${e.message}")

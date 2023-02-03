@@ -1,10 +1,7 @@
 package com.realityexpander.aprocessor
 
 import com.google.auto.service.AutoService
-import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.*
 import java.io.File
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
@@ -58,101 +55,76 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
         val packageName = processingEnv.elementUtils.getPackageOf(element).toString()
 
 //        val fileName = "Validate${className}Ext"
-        val fileName2 = "Validate${className}"
+        val fileName2 = "Validated${className}"
+        val modifiedClassName = fileName2
         val fileBuilder= FileSpec.builder(packageName, fileName2)
 
-        val dollarBracket = "\${"
-
-//        val classBuilder = TypeSpec.classBuilder(fileName)
-//        for (enclosed in element.enclosedElements) {
-//            if (enclosed.kind == ElementKind.FIELD) {
-//                classBuilder.addProperty(
-//                    PropertySpec
-//                        .varBuilder(
-//                            enclosed.simpleName.toString(),
-//                            enclosed.asType().asTypeName().asNullable(),
-//                            KModifier.PRIVATE)
-//                        .initializer("null")
-//                        .build()
-//                )
-//                classBuilder.addFunction(
-//                    FunSpec.builder("get${enclosed.simpleName}")
-//                        .returns(
-//                            enclosed
-//                                .asType().asTypeName().asNullable())
-//                        .addStatement("return ${enclosed.simpleName}")
-//                        .build()
-//                )
-//                classBuilder.addFunction(
-//                    FunSpec.builder("set${enclosed.simpleName}")
-//                        .addParameter(
-//                            ParameterSpec.builder(
-//                                "${enclosed.simpleName}",
-//                                enclosed.asType().asTypeName().asNullable()
-//                            ).build())
-//                        .addStatement("this.${enclosed.simpleName} = ${enclosed.simpleName}")
-//                        .addCode(CodeBlock.builder().addStatement(
-//                            """
-//                                println("${enclosed.simpleName}: $dollarBracket${enclosed.simpleName}}")
-//                            """
-//                                .trimIndent()).build())
-//                        .build()
-//                )
-//            }
-//        }
-
-//        val extensionBuilder = FunSpec.builder("toValidated${className}")
-////            .receiver(ClassName(packageName, className))
-//            .receiver(String::class.asTypeName())
-//            .addParameter(
-//                ParameterSpec.builder(
-//                    "regexPattern",
-//                    String::class.asTypeName()
-//                ).defaultValue("\"\"\"${regexParam}\"\"\"")
-//                    .build())
-//            .returns(ClassName(packageName, className).asNullable())
-//            .addCode(CodeBlock.builder().addStatement(
-//                """
-//                return if (regexPattern.toRegex().matches(this))
-//                       ${className}(this)
-//                    else
-//                       ${if (useExceptions)
-//                    "throw IllegalArgumentException(\"value: \$this does not match regexPattern: \$regexPattern\")"
-//                else
-//                    "null"
-//                }
-//                """
-//                    .trimIndent()).build())
-////            .addStatement("return $className(0, \"${regexParam}\")")
-
-        val inlineClass = TypeSpec.classBuilder(fileName2)
-            .addModifiers(KModifier.VALUE)
-            .addAnnotation(JvmInline::class)
-            .addProperty("value", String::class)
-//            .addModifiers(KModifier.valueOf("value"))
-//            .primaryConstructor(
-//                FunSpec.builder("constructor")
-//                    .addParameter(
-//                        ParameterSpec.builder(
-//                            "value",
-//                            String::class.asTypeName()
-//                        ).build()
-//                    ).addModifiers(KModifier.PRIVATE)
-//                    .build()
-//                )
-            .primaryConstructor(
-                FunSpec.constructorBuilder()
-                    .addParameter("value", String::class)
-                    .addModifiers(KModifier.PRIVATE)
-//                    .addStatement("this.%N = %N", "greeting", "greeting")
+        val companion = TypeSpec.companionObjectBuilder()
+            .addProperty(
+                PropertySpec.builder("regexPatternFor$className", String::class)
+                    .initializer("%S", regexParam)
+                    .addModifiers(KModifier.CONST)
                     .build()
             )
-//            .addCode(CodeBlock.builder().addStatement(
-//                """
-//                    println("hello")
-//
-//                """.trimIndent()
-//            ))
+            .addFunction(
+                FunSpec.builder("toValidated$className")
+                    .receiver(String::class)
+                    .addParameter(ParameterSpec.builder(
+                            "regexPattern",
+                            String::class.asTypeName().copy(nullable = true),
+                        ).defaultValue("regexPatternFor$className")
+                        .build())
+                    .addCode(
+                        """
+                        |   return if (
+                        |      (regexPattern ?: regexPatternForDateString).toRegex().matches(this)
+                        |   )
+                        |      ${modifiedClassName}(this)
+                        |   else
+                        |       null
+                        """.trimMargin()
+                    )
+                    .returns(ClassName(packageName, modifiedClassName).copy(nullable = true))
+                    .build()
+            )
+            .build()
+
+        val publicConstructor = FunSpec.constructorBuilder()
+            .addParameter("valueString", String::class)
+            .addParameter(
+                ParameterSpec.builder(
+                    "regexPattern",
+                    String::class.asTypeName().copy(nullable = true),
+                )
+                .defaultValue("null")
+                .build()
+            )
+            .callThisConstructor(
+                """
+                |valueString.to$modifiedClassName(regexPattern)?._data
+                |    ?: throw IllegalArgumentException("value: ${'$'}valueString does not match " + 
+                |    "regexPattern: ${'$'}regexPattern")
+                |
+                """.trimMargin()
+            )
+            .build()
+
+        val inlineClass2 = TypeSpec.valueClassBuilder(fileName2)
+            .addAnnotation(JvmInline::class)
+            .primaryConstructor(
+                FunSpec.constructorBuilder()
+                    .addParameter("_data", String::class)
+                    .addModifiers(KModifier.PRIVATE)
+                    .build(),
+            )
+            .addProperty(
+                PropertySpec.builder("_data", String::class)
+                    .initializer("_data")
+                    .addModifiers(KModifier.PRIVATE)
+                    .build(),
+            )
+            .addFunction(publicConstructor)
+            .addType(companion)
 
 
 
@@ -160,7 +132,7 @@ class ValidateAnnotationProcessor : AbstractProcessor() {
         val file = fileBuilder
 //            .addType(classBuilder.build())
 //            .addFunction(extensionBuilder.build())
-            .addType(inlineClass.build())
+            .addType(inlineClass2.build())
             .build()
 
         val kaptKotlinGeneratedDir = processingEnv.options[KAPT_KOTLIN_GENERATED_OPTION_NAME]

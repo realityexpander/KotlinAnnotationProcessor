@@ -28,21 +28,26 @@ data class ValidatedDateString1 private constructor(
 
 // V2
 @JvmInline
-value class ValidatedDateString3 private constructor(val value: String) {  // <---
-
+value class ValidatedDateString3 private constructor(
+    private val _data: String
+) {
     // Enforces validation upon instantiation
-    constructor(value: String, regexPattern: String? = null) : this(
-        if ((regexPattern ?: regexPatternForDateString).toRegex().matches(value))
-            value
-        else
-            // null // if throwExceptions == false
-            throw IllegalArgumentException("value: $value does not match regexPattern: $regexPatternForDateString")
+    constructor(valueString: String, regexPattern: String? = null) : this(
+//        if ((regexPattern ?: regexPatternForDateString).toRegex().matches(value))
+//            value
+//        else
+//            // null // if throwExceptions == false
+//            throw IllegalArgumentException("value: $value does not match regexPattern: $regexPatternForDateString")
+
+        valueString.toValidatedDateString3(regexPattern)?._data
+            ?: throw IllegalArgumentException("value: $valueString does not match regexPattern: $regexPattern")
+
     )
 
     companion object {
         const val regexPatternForDateString = """^\d{4}-\d{2}-\d{2}$"""
 
-        fun String.toValidatedDateString(regexPattern: String?): ValidatedDateString3? {
+        fun String.toValidatedDateString3(regexPattern: String?): ValidatedDateString3? {
             return if ((regexPattern ?: regexPatternForDateString).toRegex().matches(this))
                 ValidatedDateString3(this)
             else
